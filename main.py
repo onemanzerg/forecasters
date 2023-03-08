@@ -1,10 +1,11 @@
+import asyncio
 from aiogram import Bot, Dispatcher, executor, types
 from os import getenv
 from sys import exit
 from aiogram.dispatcher.filters import Text
 from scheduled import parse_scheduled
 from keyboards import main_kb
-from database import create_player_table
+from database import create_player_table, update_player_table, insert_player_table
 
 bot_token = getenv("BOT_TOKEN")
 if not bot_token:
@@ -39,5 +40,12 @@ async def do_betting(callback: types.CallbackQuery) -> None:
     await callback.answer("Готово!", show_alert=True)
 
 
+async def update_tables_every_hour():
+    while True:
+        update_player_table(table_name=None)
+        await asyncio.sleep(600)
+
 if __name__ == '__main__':
+    loop = asyncio.get_event_loop()
+    loop.create_task(update_tables_every_hour())
     executor.start_polling(dp, skip_updates=True)
