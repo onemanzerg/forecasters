@@ -1,5 +1,6 @@
 import sqlite3 as sq
 from serie_a_results import parse_results
+from scheduled import parse_scheduled
 
 
 def create_matches_table(table_name="matches"):
@@ -42,8 +43,45 @@ def create_player_table(nickname):
                    match_id INTEGER PRIMARY KEY AUTOINCREMENT,
                    title TEXT NOT NULL,
                    score TEXT NOT NULL,
-                   forecast TEXT NOT NULL,
+                   forecast TEXT,
                    time TEXT NOT NULL,
                    category TEXT NOT NULL
                 )""")
         con.commit()
+
+
+def insert_player_table(table_name):
+    with sq.connect("database.db") as con:
+        cur = con.cursor()
+        for match in parse_scheduled():
+            cur.execute(f"SELECT 1 FROM {table_name} WHERE title = ? AND category = ?", (match[0], match[3]))
+            if cur.fetchone() is None:
+                cur.execute(
+                    f"""INSERT INTO {table_name} (title, score, time, category) VALUES ('{match[0]}', '{match[1]}',
+                    '{match[2]}', '{match[3]}')
+                    """)
+                print("Матч добавлен.")
+            else:
+                print("Такой матч уже есть")
+    con.commit()
+
+
+def update_player_table(table_name):
+    with sq.connect("database.db") as con:
+        cur = con.cursor()
+        for match in parse_scheduled():
+            cur.execute(f"UPDATE {table_name} SET score = ? WHERE title = ? AND category = ?", (match[1], match[0], match[3]))
+        print(f"Счёт матча обновлён.") # Обновляет только 1 матч, а надо, чтобы сразу все или только те где появился счет
+
+
+def last_tour_matches(table_name, category):
+    with sq.connect("database.db") as con:
+        cur = con.cursor()
+        cur.execute(f"SELECT * FROM '{table_name}' WHERE category = '{category}'")
+        result = [title[2] for title in cur.fetchall()]
+    return result
+
+
+
+
+
