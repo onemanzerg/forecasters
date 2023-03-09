@@ -62,7 +62,7 @@ def insert_player_table(table_name):
                     """)
                 print("Матч добавлен.")
             else:
-                print("Такой матч уже есть")
+                print("Такой матч уже есть.")
     con.commit()
 
 
@@ -82,6 +82,9 @@ def last_tour_matches(table_name, category):
     return result
 
 
-
-
-
+def all_players_tables():
+    with sq.connect("database.db") as con:
+        cur = con.cursor()
+        cur.execute("SELECT name FROM sqlite_master WHERE type='table' AND sql LIKE '%forecast%'")
+        tables = cur.fetchall()
+    return tables
