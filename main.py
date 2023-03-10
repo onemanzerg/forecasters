@@ -25,27 +25,32 @@ async def start_cmd(message: types.Message) -> None:
 @dp.message_handler(Text(equals="Сделать ставки"))
 async def betting_cmd(message: types.Message) -> None:
     buttons = [
-        types.InlineKeyboardButton(text=f"{match[0]}", callback_data=f"{match[0]}") for match in
-        parse_scheduled()[:8]
+        types.InlineKeyboardButton(text=f"{match[0]} | {match[3]}", callback_data=f"{match[0]}") for match in
+        parse_scheduled()[:10]
     ]
-    keyboard = types.InlineKeyboardMarkup(row_width=2)
+    keyboard = types.InlineKeyboardMarkup(row_width=1)
     keyboard.add(*buttons)
-    await message.answer("Это предстоящие матчи. Напиши свой прогноз в формате 0-0.", reply_markup=keyboard)
+    await message.answer("Это предстоящие матчи. Выбери матч для ставки.", reply_markup=keyboard)
 
 
-@dp.callback_query_handler(text='—')
-async def do_betting(callback: types.CallbackQuery) -> None:
-    await callback.answer("Ставка сделана!", show_alert=True)
-    # Пользователь жмет на кнопку, по этой кнопке в столбце title ищется матч и в столбце forecast вставляется то, что воодит юзер
-    # Подрубаем машину состояний и ждем когда пользователь впишет релевантный прогноз, затем обновляем инлайн клавиатуру, чтобы этот матч пропал
-    # await callback.answer("Готово!", show_alert=True)
+# @dp.callback_query_handler(text='—')
+# async def do_betting(callback: types.CallbackQuery) -> None:
+#     await callback.answer("Ставка сделана!", show_alert=True)
+#     # Пользователь жмет на кнопку, по этой кнопке в столбце title ищется матч и в столбце forecast вставляется то, что воодит юзер
+#     # Подрубаем машину состояний и ждем когда пользователь впишет релевантный прогноз, затем обновляем инлайн клавиатуру, чтобы этот матч пропал
+#     # await callback.answer("Готово!", show_alert=True)
+
+@dp.callback_query_handler(lambda callback_query: True)
+async def process_callback(callback: types.CallbackQuery):
+    match = callback.data
+    await callback.message.answer(f"Вы выбрали матч {match}. Напиши в чат прогноз на игру в формате 0-0")
 
 
 async def update_tables_every_hour():
     while True:
         for table in all_players_tables():
             update_player_table(table_name=table[0])
-            await asyncio.sleep(600)
+            await asyncio.sleep(300)
 
 
 if __name__ == '__main__':

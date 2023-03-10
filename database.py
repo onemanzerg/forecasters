@@ -1,5 +1,4 @@
 import sqlite3 as sq
-from serie_a_results import parse_results
 from scheduled import parse_scheduled
 
 
@@ -62,7 +61,7 @@ def insert_player_table(table_name):
                     """)
                 print("Матч добавлен.")
             else:
-                print("Такой матч уже есть.")
+                continue
     con.commit()
 
 
@@ -74,12 +73,12 @@ def update_player_table(table_name):
         print(f"Счёт матча обновлён.") # Обновляет только 1 матч, а надо, чтобы сразу все или только те где появился счет
 
 
-def last_tour_matches(table_name, category):
-    with sq.connect("database.db") as con:
-        cur = con.cursor()
-        cur.execute(f"SELECT * FROM '{table_name}' WHERE category = '{category}'")
-        result = [title[2] for title in cur.fetchall()]
-    return result
+# def last_tour_matches(table_name, category):
+#     with sq.connect("database.db") as con:
+#         cur = con.cursor()
+#         cur.execute(f"SELECT * FROM '{table_name}' WHERE category = '{category}'")
+#         result = [title[2] for title in cur.fetchall()]
+#     return result
 
 
 def all_players_tables():
@@ -88,3 +87,11 @@ def all_players_tables():
         cur.execute("SELECT name FROM sqlite_master WHERE type='table' AND sql LIKE '%forecast%'")
         tables = cur.fetchall()
     return tables
+
+def last_tour_buttons(player_table):
+    with sq.connect("database.db") as con:
+        cur = con.cursor()
+        last_tour = f"SELECT * FROM {player_table} WHERE forecast='' ORDER BY match_id DESC LIMIT 8"
+        cur.execute(last_tour)
+        result = cur.fetchall()
+    return result
