@@ -5,7 +5,8 @@ from sys import exit
 from aiogram.dispatcher.filters import Text
 from scheduled import parse_scheduled
 from keyboards import main_kb
-from database import create_player_table, update_player_table, insert_player_table, all_players_tables
+from database import create_player_table, update_player_table, insert_player_table, all_players_tables, \
+    last_tour_buttons
 
 bot_token = getenv("BOT_TOKEN")
 if not bot_token:
@@ -25,8 +26,8 @@ async def start_cmd(message: types.Message) -> None:
 @dp.message_handler(Text(equals="Сделать ставки"))
 async def betting_cmd(message: types.Message) -> None:
     buttons = [
-        types.InlineKeyboardButton(text=f"{match[0]} | {match[3]}", callback_data=f"{match[0]}") for match in
-        parse_scheduled()[:10]
+        types.InlineKeyboardButton(text=f"{match[1]} | {match[5]}", callback_data=f"{match[1]}") for match in
+        last_tour_buttons(message.from_user.username)
     ]
     keyboard = types.InlineKeyboardMarkup(row_width=1)
     keyboard.add(*buttons)
@@ -50,7 +51,7 @@ async def update_tables_every_hour():
     while True:
         for table in all_players_tables():
             update_player_table(table_name=table[0])
-            await asyncio.sleep(300)
+            await asyncio.sleep(600)
 
 
 if __name__ == '__main__':
