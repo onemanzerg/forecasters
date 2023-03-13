@@ -22,5 +22,3 @@ def parse_scheduled():
     title = (f"{team[0]} - {team[1]}" for team in zip(team1, team2))
     score = (tire.text for tire in data.find_all(class_='score'))
     return list(zip(title, score, time, category))
-
-# заполняем таблицу игрока на основе вкладки расписания. если счет появился, то в SQL таблицу апдейт счет.

@@ -75,14 +75,6 @@ def update_player_table(table_name):
             f"Счёт матча обновлён.")  # Обновляет только 1 матч, а надо, чтобы сразу все или только те где появился счет
 
 
-# def last_tour_matches(table_name, category):
-#     with sq.connect("database.db") as con:
-#         cur = con.cursor()
-#         cur.execute(f"SELECT * FROM '{table_name}' WHERE category = '{category}'")
-#         result = [title[2] for title in cur.fetchall()]
-#     return result
-
-
 def all_players_tables():
     with sq.connect("database.db") as con:
         cur = con.cursor()
@@ -94,9 +86,7 @@ def all_players_tables():
 def last_tour_buttons(player_table):
     with sq.connect("database.db") as con:
         cur = con.cursor()
-        last_tour = f"SELECT * FROM {player_table} WHERE forecast is NULL ORDER BY match_id LIMIT 8"
+        last_tour = f"SELECT * FROM {player_table} WHERE forecast is NULL AND score = '—' ORDER BY match_id LIMIT 8"
         cur.execute(last_tour)
         result = cur.fetchall()
-        # добавить, чтоб выдавал список не только где пустое поле forecast, но и где в поле score = '—'
-
         return result
