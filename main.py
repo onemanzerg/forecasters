@@ -78,6 +78,7 @@ async def bet_forecast(message: types.Message, state: FSMContext) -> None:
     # Нужно подключить MemoryStorage
 
 
+
 async def update_tables_every_hour():
     while True:
         for table in all_players_tables():
