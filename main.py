@@ -10,11 +10,13 @@ from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters.state import State, StatesGroup
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from functions import check_valid_score
+from config import BOT_TOKEN
 
-bot_token = getenv("BOT_TOKEN")
-if not bot_token:
-    exit("Error: no token provided")
+# bot_token = getenv("BOT_TOKEN")
+# if not bot_token:
+#     exit("Error: no token provided")
 
+bot_token = BOT_TOKEN
 storage = MemoryStorage()
 bot = Bot(token=bot_token)
 dp = Dispatcher(bot=bot, storage=storage)
@@ -62,12 +64,11 @@ async def process_callback(callback: types.CallbackQuery, state: FSMContext):
     tour = callback.data.split("|")[1].strip()
     print(match)
     print(tour)
-    await callback.message.answer(f"Вы выбрали матч {match[0]}. Тур {match[1]} Напиши в чат прогноз на игру в формате 0:0")
+    await callback.message.answer(f"Вы выбрали матч {match}. Напиши в чат прогноз на игру в формате 0:0")
     # должен сохранить в мемори данные название матча и тура
     async with state.proxy() as data:
         data['match'] = match
-    print(match)
-    # await callback.message.answer(data['match'], data['tour'])
+        data['tour'] = tour
     await BetForecast.waiting_for_forecast.set()
     # await state.update_data(chosen_match=callback.data)
     # await callback.message.answer(state.get_data())
@@ -78,9 +79,15 @@ async def bet_forecast(message: types.Message, state: FSMContext) -> None:
     if not check_valid_score(message.text):
         await message.answer("Не правильно. Попробуй ещё раз написать матч в формате 0:0.")
         return
+    
+    await message.answer("Прогноз принят", reply_markup=keyboard)
+    async with state.proxy() as data:
+        data['score'] = message.text  # добавить обработчик текста, чтобы в нормальном формате
+        match = data['match']
+        
+    await message.answer(f"Вы поставили {data['score']} на матч {match}")
     await state.finish()
     keyboard = last_tour_keyboard(message.from_user.username)
-    await message.answer("Прогноз принят", reply_markup=keyboard)
 
 
 async def update_tables_every_hour():
